@@ -1,3 +1,4 @@
+
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
@@ -9,16 +10,36 @@ contract CounterTest is Test {
 
     function setUp() public {
         counter = new Counter();
-        counter.setNumber(0);
+    }
+
+    function test_GetInitialCount() public view {
+        uint256 current = counter.get();
+        assertEq(current, 0, "Initial count should be 0");
     }
 
     function test_Increment() public {
-        counter.increment();
-        assertEq(counter.number(), 1);
+        counter.inc();
+        uint256 current = counter.get();
+        assertEq(current, 1, "Count should be incremented to 1");
     }
 
-    function testFuzz_SetNumber(uint256 x) public {
-        counter.setNumber(x);
-        assertEq(counter.number(), x);
+    function test_Decrement() public {
+        counter.inc(); // First increment to 1
+        counter.dec(); // Then decrement back to 0
+        uint256 current = counter.get();
+        assertEq(current, 0, "Count should be decremented back to 0");
+    }
+
+    function test_DecrementShouldFailIfZero() public {
+        vm.expectRevert("Counter: cannot decrement below zero");
+        counter.dec();
+    }
+
+    function test_Reset() public {
+        counter.inc();
+        counter.inc();
+        counter.reset();
+        uint256 current = counter.get();
+        assertEq(current, 0, "Count should reset to 0");
     }
 }
